@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -6,6 +6,7 @@ import Link from "next/link";
 const SignUpForm: React.FC = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [desk, setDesk] = useState("ro"); // Default to Romania
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const router = useRouter();
@@ -17,7 +18,7 @@ const SignUpForm: React.FC = () => {
       const response = await fetch("/api/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, password, desk }),
       });
 
       if (response.ok) {
@@ -59,6 +60,26 @@ const SignUpForm: React.FC = () => {
           required
           className="w-full px-3 py-2 border rounded-md"
         />
+      </div>
+      <div>
+        <label htmlFor="desk" className="block text-sm font-medium text-gray-700">
+          Select Desk (Country)
+        </label>
+        <select
+          id="desk"
+          value={desk}
+          onChange={(e) => setDesk(e.target.value)}
+          required
+          className="w-full px-3 py-2 border rounded-md"
+        >
+          <option value="ro">Romania</option>
+          <option value="it">Italy</option>
+          <option value="de">Germany</option>
+          <option value="fr">France</option>
+          <option value="es">Spain</option>
+          <option value="pl">Poland</option>
+          <option value="nl">Netherlands</option>
+        </select>
       </div>
       {error && <p className="text-sm text-red-500">{error}</p>}
       {success && <p className="text-sm text-green-500">{success}</p>}

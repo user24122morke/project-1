@@ -6,15 +6,21 @@ const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
   try {
-    const { username, password } = await req.json();
+    const { username, password, desk } = await req.json();
 
     // Verifică dacă utilizatorul există deja
     const existingAdmin = await prisma.admin.findUnique({
-      where: { login: username },
+      where: { username: username },
     });
 
     if (existingAdmin) {
       return NextResponse.json({ message: "Admin already exists" }, { status: 400 });
+    }
+
+    // Verifică dacă desk (țara) este validă
+    const validDesks = ["ro", "it", "de", "fr", "es", "pl", "nl"];
+    if (!validDesks.includes(desk)) {
+      return NextResponse.json({ message: "Invalid desk value" }, { status: 400 });
     }
 
     // Hash-uiește parola folosind bcrypt
@@ -23,10 +29,12 @@ export async function POST(req: NextRequest) {
     // Creează noul admin în baza de date
     const newAdmin = await prisma.admin.create({
       data: {
-        login: username,
+        username: username,
         password: hashedPassword,
+        desk: desk,
       },
     });
+    
 
     return NextResponse.json({ message: "Admin created successfully!", admin: newAdmin }, { status: 201 });
   } catch (error) {
