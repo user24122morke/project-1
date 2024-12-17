@@ -25,14 +25,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Invalid password" }, { status: 401 });
     }
 
-    // Generează un token JWT
-    const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, {
-      expiresIn: "1h",
-    });
+    // Generează un token JWT care include rolul
+    const token = jwt.sign(
+      { id: user.id, username: user.username, role: user.role }, // Adăugăm rolul în token
+      SECRET_KEY,
+      { expiresIn: "1h" }
+    );
 
-    // Returnează token-ul și userId
+    // Returnează token-ul, userId și rolul
     return NextResponse.json(
-      { message: "Login successful", token: token, userId: user.id },
+      { 
+        message: "Login successful", 
+        token: token, 
+        userId: user.id,
+        role: user.role // Trimitem și rolul
+      },
       { status: 200 }
     );
   } catch (error) {

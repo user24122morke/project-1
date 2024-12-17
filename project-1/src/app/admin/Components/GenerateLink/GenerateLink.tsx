@@ -10,13 +10,11 @@ const europeanCountries = [
 ];
 
 const GenerateLink: React.FC = () => {
-  const { userId } = useAuth(); // Get the logged-in user's ID
+  const { userId, role } = useAuth(); // Get the logged-in user's ID and role
   const [country, setCountry] = useState<string>("");
   const [generatedLink, setGeneratedLink] = useState<string>("");
 
   const handleGenerate = () => {
-   
-
     if (!country) {
       alert("Please select a country!");
       return;
@@ -45,6 +43,13 @@ const GenerateLink: React.FC = () => {
   return (
     <div className="flex flex-col items-center space-y-4 p-6 bg-white shadow-lg rounded-md">
       <h1 className="text-2xl font-bold">Generate Checkout Link</h1>
+
+      {/* Afișarea Rolului Utilizatorului */}
+      <div className="text-sm text-gray-600">
+        <p>
+          <strong>User Role:</strong> {role || "Unknown"}
+        </p>
+      </div>
 
       <div className="w-full max-w-md">
         <label htmlFor="country" className="block text-sm font-medium text-gray-700">

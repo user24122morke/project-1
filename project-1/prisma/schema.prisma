@@ -23,7 +23,7 @@ model Admin {
 
 
 model Card {
-  id          Int     @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   cardNumber  String
   cardType    String
   amount      Float
@@ -32,6 +32,7 @@ model Card {
   holder      String
   country     String
   createdAt   DateTime @default(now())
+  createdBy   Int   
 }
 
 
