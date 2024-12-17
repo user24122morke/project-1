@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useParams } from "next/navigation";
-import PaymentInput from "../PaymentInput";
+
 import PayButton from "../PayButton";
 import Image from "next/image";
 
