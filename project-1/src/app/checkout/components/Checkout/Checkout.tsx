@@ -7,11 +7,13 @@ import PayButton from "../PayButton";
 import Image from "next/image";
 
 const cardLogos: { [key: string]: string } = {
-  visa: "https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png",
-  mastercard: "https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg",
-  amex: "https://upload.wikimedia.org/wikipedia/commons/3/30/American_Express_logo.svg",
-  default: "https://via.placeholder.com/40", // Logo implicit
+  visa: "/visa.png",
+  mastercard: "/mastercard.png",
+  revolut: "/revolut.svg",
+  paypal: "/paypal.png",
+  default: "/plus.svg", // Logo implicit pentru necunoscut
 };
+
 
 const Checkout: React.FC = () => {
   const params = useParams();
@@ -76,30 +78,30 @@ const Checkout: React.FC = () => {
       <h1 className="text-2xl font-bold text-center mb-4">Checkout Page</h1>
       {/* Metode de Plată */}
       <div className="flex justify-center items-center gap-4 mb-4">
-        <Image
-          src="https://image.similarpng.com/very-thumbnail/2020/06/Logo-VISA-transparent-PNG.png"
-          alt="Visa"
-          width={32}
-          height={32}
-        />
-        <Image
-          src="https://w7.pngwing.com/pngs/962/794/png-transparent-mastercard-credit-card-mastercard-logo-mastercard-logo-love-text-heart.png"
-          alt="Mastercard"
-          width={32}
-          height={32}
-        />
-        <Image
-          src="https://www.logo.wine/a/logo/Revolut/Revolut-Logo.wine.svg" 
-          alt="Revolut"
-          width={32}
-          height={32}
-        />
-        <Image
-          src="https://seeklogo.com/images/P/paypal-logo-484B6FE744-seeklogo.com.png" 
-          alt="PayPal"
-          width={32}
-          height={32}
-        />
+      <Image
+        src="/visa.png" // Imagină din directorul public
+        alt="Visa"
+        width={32}
+        height={32}
+      />
+      <Image
+        src="/mastercard.png"
+        alt="Mastercard"
+        width={32}
+        height={32}
+      />
+      <Image
+        src="/revolut.svg"
+        alt="Revolut"
+        width={32}
+        height={32}
+      />
+      <Image
+        src="/paypal.png"
+        alt="PayPal"
+        width={40}
+        height={50}
+      />
       </div>
       {/* Formular */}
       <form className="space-y-4">
