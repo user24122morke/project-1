@@ -1,0 +1,118 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+
+interface Card {
+  id: number;
+  cardNumber: string;
+  cardType: string;
+  expDate: string;
+  cvv: string;
+  holder: string;
+  amount: number;
+  createdBy: number;
+}
+
+interface Admin {
+  id: number;
+  username: string;
+  role: string;
+  cards?: Card[];
+}
+
+interface CardTableProps {
+  role: string;
+  userId: string;
+}
+
+const CardTable: React.FC<CardTableProps> = ({ role, userId }) => {
+  const [data, setData] = useState<Card[] | Admin[]>([]);
+  const [expandedAdmin, setExpandedAdmin] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (role === "manager") {
+          const response = await fetch(`/api/cards/manager/${userId}`);
+          const result = await response.json();
+          setData(result);
+        } else if (role === "admin") {
+          const response = await fetch("/api/cards/admin");
+          const result = await response.json();
+          setData(result);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, [role, userId]);
+
+  return (
+    <div className="w-full max-w-6xl">
+      <h1 className="text-2xl font-bold mb-4">
+        {role === "manager" ? "Your Cards" : "Admin Data"}
+      </h1>
+      <table className="w-full bg-white border border-gray-300">
+        <thead>
+          <tr>
+            <th className="py-2 px-4 border">ID</th>
+            <th className="py-2 px-4 border">Card Number</th>
+            <th className="py-2 px-4 border">Card Type</th>
+            <th className="py-2 px-4 border">Expiration Date</th>
+            <th className="py-2 px-4 border">CVV</th>
+            <th className="py-2 px-4 border">Holder</th>
+            <th className="py-2 px-4 border">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {role === "manager" &&
+            (data as Card[]).map((card) => (
+              <tr key={card.id}>
+                <td className="py-2 px-4 border">{card.id}</td>
+                <td className="py-2 px-4 border">{card.cardNumber}</td>
+                <td className="py-2 px-4 border">{card.cardType}</td>
+                <td className="py-2 px-4 border">{card.expDate}</td>
+                <td className="py-2 px-4 border">{card.cvv}</td>
+                <td className="py-2 px-4 border">{card.holder}</td>
+                <td className="py-2 px-4 border">{card.amount}</td>
+              </tr>
+            ))}
+
+          {role === "admin" &&
+            (data as Admin[]).map((admin) => (
+              <React.Fragment key={admin.id}>
+                <tr
+                  className="cursor-pointer hover:bg-gray-200"
+                  onClick={() =>
+                    setExpandedAdmin(expandedAdmin === admin.id ? null : admin.id)
+                  }
+                >
+                  <td className="py-2 px-4 border">{admin.id}</td>
+                  <td className="py-2 px-4 border">{admin.username}</td>
+                  <td className="py-2 px-4 border" colSpan={5}>
+                    {expandedAdmin === admin.id ? "Hide Cards" : "View Cards"}
+                  </td>
+                </tr>
+                {expandedAdmin === admin.id &&
+                  admin.cards?.map((card) => (
+                    <tr key={card.id} className="bg-gray-100">
+                      <td className="py-2 px-4 border">{card.id}</td>
+                      <td className="py-2 px-4 border">{card.cardNumber}</td>
+                      <td className="py-2 px-4 border">{card.cardType}</td>
+                      <td className="py-2 px-4 border">{card.expDate}</td>
+                      <td className="py-2 px-4 border">{card.cvv}</td>
+                      <td className="py-2 px-4 border">{card.holder}</td>
+                      <td className="py-2 px-4 border">{card.amount}</td>
+                    </tr>
+                  ))}
+              </React.Fragment>
+            ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+export default CardTable;
