@@ -1,20 +1,13 @@
-"use client"
-import React, {
-  ReactNode,
-  ReactElement,
-  createContext,
-  useState,
-  useContext,
-  useEffect,
-  useCallback,
-} from "react";
+"use client";
+
+import React, { ReactNode, ReactElement, createContext, useState, useContext, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import jwtDecode from "jsonwebtoken"; // Pentru decodarea token-ului
+import jwtDecode from "jsonwebtoken"; // Pentru decodarea tokenului JWT
 
 interface AuthContextType {
   isAuthenticated: boolean;
   userId: string | null;
-  role: string | null; // Adăugat rolul
+  role: string | null;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
@@ -25,54 +18,49 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({
-  children,
-}): ReactElement => {
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }): ReactElement => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [userId, setUserId] = useState<string | null>(null);
-  const [role, setRole] = useState<string | null>(null); // Stare pentru rol
+  const [role, setRole] = useState<string | null>(null);
   const router = useRouter();
 
+  // Verifică dacă tokenul este valid
   const isTokenValid = (token: string): boolean => {
     try {
       const decoded: any = jwtDecode.decode(token);
-      if (!decoded || decoded.exp * 1000 < Date.now()) {
-        return false;
-      }
-      return true;
+      return decoded && decoded.exp * 1000 > Date.now();
     } catch (error) {
       return false;
     }
   };
 
-  // Folosim useCallback pentru a stabiliza funcția logout
+  // Logout
   const logout = useCallback(() => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("userId");
     localStorage.removeItem("role");
     setIsAuthenticated(false);
     setUserId(null);
-    setRole(null); // Reset rol
+    setRole(null);
     router.push("/");
   }, [router]);
 
+  // Initializează starea la încărcarea paginii
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     const savedUserId = localStorage.getItem("userId");
     const savedRole = localStorage.getItem("role");
 
-    if (token && savedUserId && savedRole) {
-      if (isTokenValid(token)) {
-        setIsAuthenticated(true);
-        setUserId(savedUserId);
-        setRole(savedRole); // Setează rolul din localStorage
-      } else {
-        console.warn("Token invalid or expired, logging out...");
-        logout();
-      }
+    if (token && isTokenValid(token)) {
+      setIsAuthenticated(true);
+      setUserId(savedUserId);
+      setRole(savedRole);
+    } else {
+      logout();
     }
   }, [logout]);
 
+  // Login
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
       const response = await fetch("/api/signin", {
@@ -83,22 +71,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
       if (response.ok) {
         const data = await response.json();
+        const { token, userId, role } = data;
 
-        if (data.token && data.userId && data.role) {
-          localStorage.setItem("authToken", data.token);
-          localStorage.setItem("userId", data.userId);
-          localStorage.setItem("role", data.role); // Salvează rolul
-          setIsAuthenticated(true);
-          setUserId(data.userId);
-          setRole(data.role); // Setează rolul în context
-          router.push("/admin");
-          return true;
-        } else {
-          console.error("Missing token, userId, or role in response");
-          return false;
-        }
+        // Salvează în localStorage
+        localStorage.setItem("authToken", token);
+        localStorage.setItem("userId", userId);
+        localStorage.setItem("role", role);
+
+        // Actualizează starea
+        setIsAuthenticated(true);
+        setUserId(userId);
+        setRole(role);
+
+        router.push("/admin");
+        return true;
       } else {
-        console.error("Login failed with status:", response.status);
+        console.error("Login failed");
         return false;
       }
     } catch (error) {
