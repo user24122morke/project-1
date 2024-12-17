@@ -28,32 +28,57 @@ interface CardTableProps {
 const CardTable: React.FC<CardTableProps> = ({ role, userId }) => {
   const [data, setData] = useState<Card[] | Admin[]>([]);
   const [expandedAdmin, setExpandedAdmin] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
+
+
+  // Funcția de fetch pentru date
+  const fetchData = async () => {
+    try {
+      if (role === "manager") {
+        const response = await fetch(`/api/cards/manager/${userId}`);
+        const result = await response.json();
+        setData(result);
+      } else if (role === "admin") {
+        const response = await fetch("/api/cards/admin");
+        const result = await response.json();
+        setData(result);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        if (role === "manager") {
-          const response = await fetch(`/api/cards/manager/${userId}`);
-          const result = await response.json();
-          setData(result);
-        } else if (role === "admin") {
-          const response = await fetch("/api/cards/admin");
-          const result = await response.json();
-          setData(result);
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
+    const fetchWithDelay = async () => {
+      const delay = new Promise((resolve) => setTimeout(resolve, 3000)); // Delay de 3 secunde
+      await delay; // Așteaptă delay-ul
+      fetchData(); // Apelează fetchData după delay
     };
-
-    fetchData();
+  
+    fetchWithDelay();
   }, [role, userId]);
 
   return (
     <div className="w-full max-w-6xl">
-      <h1 className="text-2xl font-bold mb-4">
-        {role === "manager" ? "Your Cards" : "Admin Data"}
-      </h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">
+          {role === "manager" ? "Your Cards" : "Admin Data"}
+        </h1>
+        {/* Buton pentru reîncărcarea datelor */}
+        <button
+            onClick={async () => {
+              setLoading(true); // Activează starea de loading
+              await fetchData(); // Fetch-uiește datele
+              setLoading(false); // Dezactivează starea de loading după finalizare
+            }}
+            className={`px-4 py-2 rounded text-white transition ${
+              loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
+            }`}
+            disabled={loading} // Dezactivează butonul când e loading
+          >
+            {loading ? "Loading..." : "Refresh Data"}
+          </button>
+      </div>
       <table className="w-full bg-white border border-gray-300">
         <thead>
           <tr>
