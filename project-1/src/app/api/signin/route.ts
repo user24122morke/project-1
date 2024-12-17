@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken"; // JWT pentru token
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
+const SECRET_KEY = process.env.JWT_SECRET || "your_secret_key";
 
 export async function POST(req: NextRequest) {
   try {
@@ -24,8 +25,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Invalid password" }, { status: 401 });
     }
 
-    // Returnează succes
-    return NextResponse.json({ message: "Login successful" }, { status: 200 });
+    // Generează un token JWT
+    const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, {
+      expiresIn: "1h",
+    });
+
+    // Returnează token-ul și userId
+    return NextResponse.json(
+      { message: "Login successful", token: token, userId: user.id },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Error during sign-in:", error);
     return NextResponse.json({ message: "Internal server error" }, { status: 500 });

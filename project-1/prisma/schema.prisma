@@ -18,6 +18,7 @@ model Admin {
   username String @unique
   password String
   desk     String
+  role     String @default("manager")
 }
 
 

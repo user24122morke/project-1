@@ -2,9 +2,11 @@
 
 import React, { ReactNode, ReactElement, createContext, useState, useContext, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import jwtDecode from "jsonwebtoken"; // Pentru decodarea token-ului
 
 interface AuthContextType {
   isAuthenticated: boolean;
+  userId: string | null;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
@@ -17,13 +19,34 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }): ReactElement => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [userId, setUserId] = useState<string | null>(null);
   const router = useRouter();
 
+  // Funcție pentru validarea token-ului
+  const isTokenValid = (token: string): boolean => {
+    try {
+      const decoded: any = jwtDecode.decode(token); // Decodare simplă a JWT
+      if (!decoded || decoded.exp * 1000 < Date.now()) {
+        return false; // Token expirat
+      }
+      return true;
+    } catch (error) {
+      return false; // Token invalid
+    }
+  };
+
   useEffect(() => {
-    // Verificăm dacă există deja un token la inițializare
     const token = localStorage.getItem("authToken");
-    if (token) {
-      setIsAuthenticated(true);
+    const savedUserId = localStorage.getItem("userId");
+
+    if (token && savedUserId) {
+      if (isTokenValid(token)) {
+        setIsAuthenticated(true);
+        setUserId(savedUserId);
+      } else {
+        console.warn("Token invalid or expired, logging out...");
+        logout();
+      }
     }
   }, []);
 
@@ -37,11 +60,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }): ReactEl
 
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem("authToken", data.token); // Salvăm token-ul
-        setIsAuthenticated(true);
-        router.push("/admin"); // Redirecționăm către pagina /admin
-        return true;
+
+        if (data.token && data.userId) {
+          localStorage.setItem("authToken", data.token);
+          localStorage.setItem("userId", data.userId);
+          setIsAuthenticated(true);
+          setUserId(data.userId);
+          router.push("/admin");
+          return true;
+        } else {
+          console.error("Missing token or userId in response");
+          return false;
+        }
       } else {
+        console.error("Login failed with status:", response.status);
         return false;
       }
     } catch (error) {
@@ -51,13 +83,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }): ReactEl
   };
 
   const logout = () => {
-    localStorage.removeItem("authToken"); // Ștergem token-ul
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userId");
     setIsAuthenticated(false);
-    router.push("/"); // Redirecționăm către home
+    setUserId(null);
+    router.push("/");
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, userId, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
