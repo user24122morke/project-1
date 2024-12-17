@@ -45,6 +45,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     }
   };
 
+  const logout = () => {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("role");
+    setIsAuthenticated(false);
+    setUserId(null);
+    setRole(null); // Reset rol
+    router.push("/");
+  };
+  
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     const savedUserId = localStorage.getItem("userId");
@@ -60,7 +70,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
         logout();
       }
     }
-  }, []);
+  }, [logout]);
 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
@@ -96,15 +106,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("userId");
-    localStorage.removeItem("role");
-    setIsAuthenticated(false);
-    setUserId(null);
-    setRole(null); // Reset rol
-    router.push("/");
-  };
+  
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, userId, role, login, logout }}>

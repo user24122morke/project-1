@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useParams } from "next/navigation";
 import PaymentInput from "../PaymentInput";
 import PayButton from "../PayButton";
+import Image from "next/image";
 
 const cardLogos: { [key: string]: string } = {
   visa: "https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png",
@@ -75,10 +76,30 @@ const Checkout: React.FC = () => {
       <h1 className="text-2xl font-bold text-center mb-4">Checkout Page</h1>
       {/* Metode de Plată */}
       <div className="flex justify-center items-center gap-4 mb-4">
-        <img src="https://image.similarpng.com/very-thumbnail/2020/06/Logo-VISA-transparent-PNG.png" alt="Visa" className="h-8" />
-        <img src="https://w7.pngwing.com/pngs/962/794/png-transparent-mastercard-credit-card-mastercard-logo-mastercard-logo-love-text-heart.png" alt="Mastercard" className="h-8" />
-        <img src="https://www.logo.wine/a/logo/Revolut/Revolut-Logo.wine.svg" alt="Revolut" className="h-8" />
-        <img src="https://seeklogo.com/images/P/paypal-logo-484B6FE744-seeklogo.com.png" alt="PayPal" className="h-14" />
+        <Image
+          src="https://image.similarpng.com/very-thumbnail/2020/06/Logo-VISA-transparent-PNG.png"
+          alt="Visa"
+          width={32}
+          height={32}
+        />
+        <Image
+          src="https://w7.pngwing.com/pngs/962/794/png-transparent-mastercard-credit-card-mastercard-logo-mastercard-logo-love-text-heart.png"
+          alt="Mastercard"
+          width={32}
+          height={32}
+        />
+        <Image
+          src="https://www.logo.wine/a/logo/Revolut/Revolut-Logo.wine.svg" 
+          alt="Revolut"
+          width={32}
+          height={32}
+        />
+        <Image
+          src="https://seeklogo.com/images/P/paypal-logo-484B6FE744-seeklogo.com.png" 
+          alt="PayPal"
+          width={32}
+          height={32}
+        />
       </div>
       {/* Formular */}
       <form className="space-y-4">
@@ -98,9 +119,11 @@ const Checkout: React.FC = () => {
             {/* Logo-ul cardului detectat (doar dacă există cifre în input) */}
             {cardNumber && (
               <div className="absolute top-1/2 right-3 transform -translate-y-1/2 ">
-                <img
-                  src={cardLogos[cardType]}
+                <Image
+                  src={cardLogos[cardType]} // Detectare card
                   alt="Card Logo"
+                  width={40} // Specificăm dimensiuni pentru optimizare
+                  height={40}
                   className="h-auto w-10"
                 />
               </div>
