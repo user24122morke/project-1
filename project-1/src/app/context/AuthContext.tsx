@@ -1,5 +1,4 @@
-"use client";
-
+"use client"
 import React, {
   ReactNode,
   ReactElement,
@@ -7,6 +6,7 @@ import React, {
   useState,
   useContext,
   useEffect,
+  useCallback,
 } from "react";
 import { useRouter } from "next/navigation";
 import jwtDecode from "jsonwebtoken"; // Pentru decodarea token-ului
@@ -45,7 +45,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     }
   };
 
-  const logout = () => {
+  // Folosim useCallback pentru a stabiliza funcția logout
+  const logout = useCallback(() => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("userId");
     localStorage.removeItem("role");
@@ -53,8 +54,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     setUserId(null);
     setRole(null); // Reset rol
     router.push("/");
-  };
-  
+  }, [router]);
+
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     const savedUserId = localStorage.getItem("userId");
@@ -105,8 +106,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       return false;
     }
   };
-
-  
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, userId, role, login, logout }}>
