@@ -39,8 +39,17 @@ const CardTable: React.FC<CardTableProps> = ({ role, userId }) => {
         const result = await response.json();
         setData(result);
       } else if (role === "admin") {
+        console.log({
+          message: 'trebuie sa traga datele de ruta adiminului'
+        });
+        
         const response = await fetch("/api/cards/admin");
         const result = await response.json();
+        console.log({
+          message: "datele",
+          result
+        });
+        
         setData(result);
       }
     } catch (error) {
