@@ -8,7 +8,8 @@ export async function GET() {
     const admins = await prisma.admin.findMany({
         include: { cards: true },
       });
-
+      console.log(admins);
+      
     return NextResponse.json(admins, { status: 200 });
   } catch (error) {
     console.error("Error fetching admin data:", error);
