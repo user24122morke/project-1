@@ -34,7 +34,11 @@ const CardTable: React.FC<CardTableProps> = ({ role, userId }) => {
   // Funcția de fetch pentru date
   const fetchData = async () => {
     try {
-      if (role === "manager") {
+      if (role === "manager") { 
+        console.log({
+          message: "manager role we refresh data for a manager"
+        });
+        
         const response = await fetch(`/api/cards/manager/${userId}`);
         const result = await response.json();
         setData(result);
