@@ -9,8 +9,9 @@ import GenerateLink from "./Components/GenerateLink";
 
 const AdminPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { userId, role } = useAuth();
-  console.log({userId, role});
+  const { id, role } = useAuth().user || {};
+
+  
   
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -41,7 +42,7 @@ const AdminPage: React.FC = () => {
         )}
 
         {/* Card Table */}
-        <CardTable role={role || ""} userId={userId || ""} />
+        <CardTable role={role || ""} userId={id || ""} />
       </div>
     </ProtectedRoute>
   );
