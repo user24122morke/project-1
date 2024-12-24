@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken"; // JWT pentru token
+import jwt from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   try {
     const { username, password } = await req.json();
 
-    // Caută utilizatorul în baza de date
+    // Verificăm dacă utilizatorul există
     const user = await prisma.admin.findUnique({
       where: { username: username },
     });
@@ -19,29 +19,32 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "User not found" }, { status: 401 });
     }
 
-    // Verifică parola folosind bcrypt
+    // Verificăm parola
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return NextResponse.json({ message: "Invalid password" }, { status: 401 });
     }
 
-    // Generează un token JWT care include rolul
+    // Generează token-ul JWT
     const token = jwt.sign(
-      { id: user.id, username: user.username, role: user.role }, // Adăugăm rolul în token
+      { id: user.id, username: user.username, role: user.role },
       SECRET_KEY,
       { expiresIn: "1h" }
     );
 
-    // Returnează token-ul, userId și rolul
-    return NextResponse.json(
-      { 
-        message: "Login successful", 
-        token: token, 
-        userId: user.id,
-        role: user.role // Trimitem și rolul
-      },
+    // Setăm token-ul în cookie
+    const response = NextResponse.json(
+      { message: "Login successful", userId: user.id, role: user.role },
       { status: 200 }
     );
+
+    response.cookies.set("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60, // 1 oră
+    });
+
+    return response;
   } catch (error) {
     console.error("Error during sign-in:", error);
     return NextResponse.json({ message: "Internal server error" }, { status: 500 });
