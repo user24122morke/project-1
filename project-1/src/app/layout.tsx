@@ -8,9 +8,9 @@ import Head from 'next/head';
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'safe pay',
-  description: 'checkout app',
-}
+  title: 'Safe Pay Go',
+  description: 'Safe Pay Go - a modern and secure platform for online payment processing.',
+};
 
 export default function RootLayout({
   children,
