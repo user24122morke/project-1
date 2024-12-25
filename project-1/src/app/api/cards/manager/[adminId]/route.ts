@@ -9,7 +9,10 @@ export async function GET(
   req: NextRequest,
   { params }: { params: { adminId: string } }
 ) {
+  console.log("Fetching cards for admin:", params.adminId);
+
   try {
+    // Obține token-ul din cookies
     const token = req.cookies.get("token")?.value;
 
     if (!token) {
@@ -22,7 +25,7 @@ export async function GET(
     try {
       const decoded = jwt.verify(token, SECRET_KEY);
 
-      // Verificăm dacă decoded este de tip JwtPayload
+      // Verificăm structura payload-ului token-ului
       if (typeof decoded !== "object" || !("id" in decoded)) {
         return NextResponse.json(
           { message: "Invalid token payload" },
@@ -30,8 +33,10 @@ export async function GET(
         );
       }
 
-      // Comparăm ID-ul din token cu adminId-ul din request
-      if (decoded.id !== parseInt(params.adminId)) {
+      const decodedPayload = decoded as JwtPayload;
+
+      // Comparăm ID-ul din token cu adminId-ul primit în request
+      if (decodedPayload.id !== parseInt(params.adminId)) {
         return NextResponse.json(
           { message: "Unauthorized access" },
           { status: 403 }
@@ -45,7 +50,7 @@ export async function GET(
       );
     }
 
-    // Dacă token-ul este valid și autorizarea a reușit, preluăm datele
+    // Token valid, continuăm cu preluarea datelor
     const { adminId } = params;
 
     const cards = await prisma.card.findMany({
@@ -54,7 +59,12 @@ export async function GET(
 
     return NextResponse.json(cards, { status: 200 });
   } catch (error) {
-    console.error("Error fetching manager cards:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    console.error("Error fetching admin cards:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  } finally {
+    await prisma.$disconnect(); // Închidem conexiunea cu baza de date
   }
 }

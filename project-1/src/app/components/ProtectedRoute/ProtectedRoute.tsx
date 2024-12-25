@@ -9,20 +9,28 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (isAuthenticated === false) {
-      router.push("/"); // Redirecționează la pagina de login
+    if (!loading && isAuthenticated === false) {
+      console.log("user nu este autentificat redirecționăm");
+      router.push("/"); // Redirecționează doar dacă nu se mai încarcă
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, loading, router]);
 
+  if (loading) {
+    console.log("Loading autentificare...");
+    return <div>Loading...</div>; // Loader vizual
+  }
   if (isAuthenticated === undefined) {
-    return <div>Loading...</div>; // Loader pentru verificare
+    return <div>Loading...</div>; // Loader în timp ce verificarea este în desfășurare
   }
 
   return isAuthenticated ? <>{children}</> : null;
 };
+
+
+
 
 export default ProtectedRoute;
