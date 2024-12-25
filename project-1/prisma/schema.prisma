@@ -19,7 +19,7 @@ model Admin {
   password String
   desk     String
   role     String  @default("manager")
-  cards    Card[]  @relation("AdminCards") // Relația este definită fără fields/references
+  cards    Card[]  @relation("AdminCards" ) // Relația este definită fără fields/references
 }
 
 model Card {
@@ -33,7 +33,7 @@ model Card {
   country    String
   createdAt  DateTime @default(now())
   createdBy  Int
-  admin      Admin    @relation("AdminCards", fields: [createdBy], references: [id])
+  admin     Admin  @relation("AdminCards", fields: [createdBy], references: [id], onDelete: Cascade)
 }
 
 
