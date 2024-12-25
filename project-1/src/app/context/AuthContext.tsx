@@ -8,9 +8,10 @@ import React, { ReactNode, ReactElement, createContext, useState, useContext, us
 
 interface AuthContextType {
   user: { id: string; username: string; role: string } | null;
-  isAuthenticated: boolean;
+  isAuthenticated: boolean | undefined;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
+  loading: boolean
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -18,6 +19,7 @@ const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   login: async () => false,
   logout: () => {},
+  loading: true
 });
 
 interface AuthProviderProps {
@@ -26,34 +28,30 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }): ReactElement => {
   const [user, setUser] = useState<{ id: string; username: string; role: string } | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
   useEffect(() => {
-    const checkAuth = async () => {
+    const fetchUserData = async () => {
       try {
         const response = await fetch("/api/auth/me", {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include", // Include cookies
+          credentials: "include",
         });
-  
         if (response.ok) {
           const data = await response.json();
-          setUser(data.user); // Setăm utilizatorul autenticat
-          setIsAuthenticated(true);
+          setUser(data.user);
         } else {
           setUser(null);
-          setIsAuthenticated(false);
         }
       } catch (error) {
-        console.error("Error checking auth:", error);
+        console.error("Error fetching user data:", error);
         setUser(null);
-        setIsAuthenticated(false);
+      } finally {
+        setLoading(false);
       }
     };
-  
-    checkAuth();
+
+    fetchUserData();
   }, []);
 
   const login = async (username: string, password: string) => {
@@ -69,6 +67,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }): ReactEl
         const data = await response.json();
         setUser({ id: data.userId, username: data.username, role: data.role });
         setIsAuthenticated(true);
+        console.log(data);
         router.push("/admin"); // Redirecționează utilizatorul către pagina admin
         return true;
       } else {
@@ -92,7 +91,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }): ReactEl
   
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, loading, login, logout }}>
     {children}
   </AuthContext.Provider>
   );

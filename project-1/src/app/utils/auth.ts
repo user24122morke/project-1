@@ -3,23 +3,30 @@ import { NextRequest, NextResponse } from "next/server";
 
 const SECRET_KEY = process.env.JWT_SECRET || "your_secret_key";
 
-export async function validateToken(req: NextRequest) {
+export function middleware(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
 
   if (!token) {
-    return NextResponse.json(
-      { message: "Authorization token is missing" },
-      { status: 401 }
-    );
+    // Redirecționare la pagina de login dacă token-ul lipsește
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
   try {
+    // Verifică token-ul JWT și decodifică datele
     const decoded = jwt.verify(token, SECRET_KEY);
-    return { valid: true, decoded };
-  } catch (error) {
-    return NextResponse.json(
-      { message: "Invalid or expired token" },
-      { status: 401 }
-    );
+
+    // Adaugă datele utilizatorului în antetul cererii
+    const res = NextResponse.next();
+    res.headers.set("x-user-data", JSON.stringify(decoded)); // Encodează datele utilizatorului
+    return res;
+  } catch (err) {
+    console.error("Invalid token:", err);
+    // Redirecționare la login dacă token-ul este invalid
+    return NextResponse.redirect(new URL("/", req.url));
   }
 }
+
+// Configurare pentru a proteja rutele
+export const config = {
+  matcher: ["/admin/:path*"], // Protejează toate rutele care încep cu /admin
+};

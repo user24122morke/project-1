@@ -10,34 +10,41 @@ const europeanCountries = [
 ];
 
 const GenerateLink: React.FC = () => {
-  const { userId, role } = useAuth(); // Get the logged-in user's ID and role
+  const { user } = useAuth(); // Get the logged-in user's ID and role
   const [country, setCountry] = useState<string>("");
   const [generatedLink, setGeneratedLink] = useState<string>("");
+  const [copyMessage, setCopyMessage] = useState<string>(""); // Pentru mesajul de copiere
 
   const handleGenerate = () => {
     if (!country) {
-      alert("Please select a country!");
+      setCopyMessage("Please select a country!");
       return;
     }
 
-    if (!userId) {
-      alert("You must be logged in to generate a link!");
+    if (!user?.id) {
+      setCopyMessage("You must be logged in to generate a link!");
       return;
     }
 
     // Obține URL-ul de bază dinamic
     const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
-    const link = `${baseUrl}/checkout/${country}/${userId}`;
+    const link = `${baseUrl}/checkout/${country}/${user.id}`;
     setGeneratedLink(link);
+    setCopyMessage(""); // Resetare mesaj
   };
 
   const handleCopy = () => {
     if (generatedLink) {
       navigator.clipboard.writeText(generatedLink);
-      alert("Link copied to clipboard!");
+      setCopyMessage("Link copied to clipboard!"); // Mesaj de succes
     } else {
-      alert("No link to copy!");
+      setCopyMessage("No link to copy!");
     }
+
+    // Șterge mesajul după 3 secunde
+    setTimeout(() => {
+      setCopyMessage("");
+    }, 3000);
   };
 
   return (
@@ -47,7 +54,7 @@ const GenerateLink: React.FC = () => {
       {/* Afișarea Rolului Utilizatorului */}
       <div className="text-sm text-gray-600">
         <p>
-          <strong>User Role:</strong> {role || "Unknown"}
+          <strong>User Role:</strong> {user?.role || "Unknown"}
         </p>
       </div>
 
@@ -88,6 +95,17 @@ const GenerateLink: React.FC = () => {
             Copy to Clipboard
           </button>
         </div>
+      )}
+
+      {/* Mesaj de succes sau eroare */}
+      {copyMessage && (
+        <p
+          className={`mt-2 text-sm ${
+            copyMessage === "Link copied to clipboard!" ? "text-green-600" : "text-red-600"
+          }`}
+        >
+          {copyMessage}
+        </p>
       )}
     </div>
   );
