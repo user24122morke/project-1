@@ -22,12 +22,10 @@ const PayButton: React.FC<PayButtonProps> = ({ data, disabled }) => {
   const [paymentSuccess, setPaymentSuccess] = useState(false); // Pentru succes
 
   const handleSubmit = async () => {
-    setLoading(true);
+    setLoading(true); // Începe procesarea
 
     try {
-      // Simulare delay pentru procesare
-      await new Promise((resolve) => setTimeout(resolve, 800000000));
-
+      // Trimite cererea către server imediat
       const response = await fetch("/api/save-checkout-data", {
         method: "POST",
         headers: {
@@ -41,13 +39,15 @@ const PayButton: React.FC<PayButtonProps> = ({ data, disabled }) => {
       const result = await response.json();
       console.log(result);
 
-      // Succesul plății
-      setPaymentSuccess(true);
+      // După finalizarea cererii, așteaptă puțin înainte de a afișa succesul
+      setTimeout(() => {
+        setPaymentSuccess(true);
+        setLoading(false); // Oprește cercul de încărcare
+      }, 50000000000); // Cerculețul continuă pentru încă 3 secunde
     } catch (error) {
       console.error(error);
       alert("Payment failed.");
-    } finally {
-      setLoading(false);
+      setLoading(false); // Oprește procesarea în caz de eroare
     }
   };
 
@@ -72,7 +72,7 @@ const PayButton: React.FC<PayButtonProps> = ({ data, disabled }) => {
           <div className="bg-white p-6 rounded shadow-lg text-center">
             {loading ? (
               <div className="flex flex-col items-center gap-4">
-                 <p className="text-gray-600 mt-4">Processing your payment...</p>
+                <p className="text-gray-600 mt-4">Processing your payment...</p>
                 <div className="w-14 h-14 border-4 border-blue-500 border-t-transparent border-solid rounded-full animate-spin"></div>
               </div>
             ) : (
