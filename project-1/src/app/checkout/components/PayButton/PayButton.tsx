@@ -14,9 +14,10 @@ interface PayButtonProps {
     country?: string;
     cardType?: string;
   };
+  disabled: boolean; // Adăugăm prop pentru dezactivare
 }
 
-const PayButton: React.FC<PayButtonProps> = ({ data }) => {
+const PayButton: React.FC<PayButtonProps> = ({ data, disabled }) => {
   const [loading, setLoading] = useState(false); // Pentru a afișa procesarea
   const [paymentSuccess, setPaymentSuccess] = useState(false); // Pentru a afișa modalul de succes
 
@@ -55,9 +56,11 @@ const PayButton: React.FC<PayButtonProps> = ({ data }) => {
       <button
         type="button"
         onClick={handleSubmit}
-        disabled={loading} // Dezactivează butonul în timpul procesării
+        disabled={loading || disabled} // Dezactivare în timpul procesării sau dacă formularul este invalid
         className={`w-full py-2 rounded ${
-          loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600 text-white"
+          loading || disabled
+            ? "bg-gray-400 cursor-not-allowed"
+            : "bg-blue-500 hover:bg-blue-600 text-white"
         }`}
       >
         {loading ? "Processing Payment..." : "Pay Now"}

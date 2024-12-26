@@ -1,8 +1,7 @@
-"use client";
+"use client"
 
 import React, { useState } from "react";
 import { useParams } from "next/navigation";
-
 import PayButton from "../PayButton";
 import Image from "next/image";
 import CheckoutLogo from "../../CheckoutLogo";
@@ -14,7 +13,6 @@ const cardLogos: { [key: string]: string } = {
   paypal: "/paypal.png",
   default: "/plus.svg", // Logo implicit pentru necunoscut
 };
-
 
 const Checkout: React.FC = () => {
   const params = useParams();
@@ -31,7 +29,6 @@ const Checkout: React.FC = () => {
   const detectCardType = (number: string) => {
     if (/^4/.test(number)) return "visa"; // Visa
     if (/^5[1-5]/.test(number) || /^2(2[2-9]|[3-6]\d|7[0-1])/.test(number)) return "mastercard"; // Mastercard
-    if (/^3[47]/.test(number)) return "amex"; // Amex
     return "default"; // Necunoscut
   };
 
@@ -50,21 +47,22 @@ const Checkout: React.FC = () => {
     }
     const month = value.slice(0, 2);
     if (month && (parseInt(month, 10) < 1 || parseInt(month, 10) > 12)) {
-      setError("Invalid expiry date"); 
+      setError("Invalid expiry date");
     } else {
       setError("");
     }
     setExpiry(value);
   };
-  
-  
 
   const handleCvvChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, "").slice(0, 3); // Max 3 cifre
     setCvv(value);
   };
 
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>, setter: React.Dispatch<React.SetStateAction<string>>) => {
+  const handleNameChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    setter: React.Dispatch<React.SetStateAction<string>>
+  ) => {
     const value = e.target.value.replace(/[^a-zA-Z ]/g, ""); // Doar litere
     setter(value);
   };
@@ -74,40 +72,25 @@ const Checkout: React.FC = () => {
     setAmount(value);
   };
 
+  const isFormValid =
+    cardNumber.replace(/\s/g, "").length === 16 &&
+    expiry.length === 5 &&
+    cvv.length === 3 &&
+    firstName.trim() !== "" &&
+    lastName.trim() !== "" &&
+    parseFloat(amount) >= 250 &&
+    !error;
+
   return (
     <div className="p-6 max-w-md mx-auto bg-white rounded-lg shadow-lg mt-8">
-      <CheckoutLogo/>
-      {/* <h1 className="text-2xl font-bold text-center mb-4 -mt-6">Checkout Page</h1> */}
-      {/* Metode de Plată */}
+      <CheckoutLogo />
       <div className="flex justify-center items-center gap-4 mb-4">
-      <Image
-        src="/visa.png" // Imagină din directorul public
-        alt="Visa"
-        width={32}
-        height={32}
-      />
-      <Image
-        src="/mastercard.png"
-        alt="Mastercard"
-        width={32}
-        height={32}
-      />
-      <Image
-        src="/revolut.svg"
-        alt="Revolut"
-        width={32}
-        height={32}
-      />
-      <Image
-        src="/paypal.png"
-        alt="PayPal"
-        width={40}
-        height={50}
-      />
+        <Image src="/visa.png" alt="Visa" width={32} height={32} />
+        <Image src="/mastercard.png" alt="Mastercard" width={32} height={32} />
+        <Image src="/revolut.svg" alt="Revolut" width={32} height={32} />
+        <Image src="/paypal.png" alt="PayPal" width={40} height={50} />
       </div>
-      {/* Formular */}
       <form className="space-y-4">
-        {/* Card Number */}
         <div>
           <label className="block text-gray-700 mb-1">Card Number</label>
           <div className="relative">
@@ -117,16 +100,14 @@ const Checkout: React.FC = () => {
               onChange={handleCardNumberChange}
               maxLength={19}
               placeholder="1234 5678 9012 3456"
-              className="w-full border p-2 pl-4 pr-12 rounded-md  "
-              
+              className="w-full border p-2 pl-4 pr-12 rounded-md"
             />
-            {/* Logo-ul cardului detectat (doar dacă există cifre în input) */}
             {cardNumber && (
-              <div className="absolute top-1/2 right-3 transform -translate-y-1/2 ">
+              <div className="absolute top-1/2 right-3 transform -translate-y-1/2">
                 <Image
-                  src={cardLogos[cardType]} // Detectare card
+                  src={cardLogos[cardType]}
                   alt="Card Logo"
-                  width={40} // Specificăm dimensiuni pentru optimizare
+                  width={40}
                   height={40}
                   className="h-auto w-10"
                 />
@@ -135,8 +116,6 @@ const Checkout: React.FC = () => {
           </div>
         </div>
 
-
-        {/* Expiry & CVV */}
         <div className="flex gap-4">
           <div className="w-1/2">
             <label className="block text-gray-700">Expiry (MM/YY)</label>
@@ -150,7 +129,7 @@ const Checkout: React.FC = () => {
                 error ? "border-red-500" : "border-gray-300"
               }`}
             />
-             {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
           </div>
           <div className="w-1/2">
             <label className="block text-gray-700">CVV</label>
@@ -164,7 +143,6 @@ const Checkout: React.FC = () => {
           </div>
         </div>
 
-        {/* Name */}
         <div>
           <label className="block text-gray-700">First Name</label>
           <input
@@ -186,7 +164,6 @@ const Checkout: React.FC = () => {
           />
         </div>
 
-        {/* Amount */}
         <div>
           <label className="block text-gray-700">Amount (EUR)</label>
           <input
@@ -202,8 +179,7 @@ const Checkout: React.FC = () => {
           )}
         </div>
 
-        {/* Submit Button */}
-        <PayButton 
+        <PayButton
           data={{
             cardNumber,
             expiry,
@@ -213,8 +189,9 @@ const Checkout: React.FC = () => {
             amount,
             userId,
             country,
-            cardType
+            cardType,
           }}
+          disabled={!isFormValid} // Dezactivăm butonul dacă formularul nu este valid
         />
       </form>
     </div>
