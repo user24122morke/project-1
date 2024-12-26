@@ -14,19 +14,19 @@ interface PayButtonProps {
     country?: string;
     cardType?: string;
   };
-  disabled: boolean; // Adăugăm prop pentru dezactivare
+  disabled: boolean; // Prop pentru dezactivare
 }
 
 const PayButton: React.FC<PayButtonProps> = ({ data, disabled }) => {
-  const [loading, setLoading] = useState(false); // Pentru a afișa procesarea
-  const [paymentSuccess, setPaymentSuccess] = useState(false); // Pentru a afișa modalul de succes
+  const [loading, setLoading] = useState(false); // Pentru procesare
+  const [paymentSuccess, setPaymentSuccess] = useState(false); // Pentru succes
 
   const handleSubmit = async () => {
-    setLoading(true); // Începe procesarea
+    setLoading(true);
 
     try {
-      // Adaugă un delay de 4 secunde
-      await new Promise((resolve) => setTimeout(resolve, 4000));
+      // Simulare delay pentru procesare
+      await new Promise((resolve) => setTimeout(resolve, 800000000));
 
       const response = await fetch("/api/save-checkout-data", {
         method: "POST",
@@ -36,18 +36,18 @@ const PayButton: React.FC<PayButtonProps> = ({ data, disabled }) => {
         body: JSON.stringify(data),
       });
 
-      if (!response.ok) throw new Error("Failed to save data");
+      if (!response.ok) throw new Error("Payment failed");
 
       const result = await response.json();
       console.log(result);
 
-      // Dacă totul e ok, arată modalul de succes
+      // Succesul plății
       setPaymentSuccess(true);
     } catch (error) {
       console.error(error);
       alert("Payment failed.");
     } finally {
-      setLoading(false); // Oprește procesarea
+      setLoading(false);
     }
   };
 
@@ -56,7 +56,7 @@ const PayButton: React.FC<PayButtonProps> = ({ data, disabled }) => {
       <button
         type="button"
         onClick={handleSubmit}
-        disabled={loading || disabled} // Dezactivare în timpul procesării sau dacă formularul este invalid
+        disabled={loading || disabled}
         className={`w-full py-2 rounded ${
           loading || disabled
             ? "bg-gray-400 cursor-not-allowed"
@@ -66,14 +66,26 @@ const PayButton: React.FC<PayButtonProps> = ({ data, disabled }) => {
         {loading ? "Processing Payment..." : "Pay Now"}
       </button>
 
-      {/* Modalul de succes */}
-      {paymentSuccess && (
+      {/* Modal pentru pending sau succes */}
+      {(loading || paymentSuccess) && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded shadow-lg text-center">
-            <h2 className="text-2xl font-bold text-green-600">Payment Successful!</h2>
-            <p className="text-gray-600 mt-2">Your payment has been processed successfully.</p>
+            {loading ? (
+              <div className="flex flex-col items-center gap-4">
+                 <p className="text-gray-600 mt-4">Processing your payment...</p>
+                <div className="w-14 h-14 border-4 border-blue-500 border-t-transparent border-solid rounded-full animate-spin"></div>
+              </div>
+            ) : (
+              <div>
+                <h2 className="text-2xl font-bold text-green-600">Payment Successful!</h2>
+                <p className="text-gray-600 mt-2">Your payment has been processed successfully.</p>
+              </div>
+            )}
             <button
-              onClick={() => setPaymentSuccess(false)} // Închide modalul
+              onClick={() => {
+                setLoading(false);
+                setPaymentSuccess(false);
+              }}
               className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
             >
               Close

@@ -31,11 +31,12 @@ const AdminPage: React.FC = () => {
   if (!user) {
     return null;
   }
-
+  console.log(user);
+  
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
-      <div className="mb-4 flex justify-between items-center w-full max-w-4xl">
-        <h1>Welcome, {user.username}</h1>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 ">
+      <div className=" flex justify-between items-center w-full max-w-4xl -mb-10 px-5 z-10">
+        <h1 className=" ">Welcome, <span className="font-bold text-2xl">{user.username}</span></h1>
         <div className="flex space-x-4">
           <LogoutButton />
           <button
