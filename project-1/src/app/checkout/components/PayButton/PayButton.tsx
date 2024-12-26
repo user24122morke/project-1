@@ -19,7 +19,6 @@ interface PayButtonProps {
 
 const PayButton: React.FC<PayButtonProps> = ({ data, disabled }) => {
   const [loading, setLoading] = useState(false); // Pentru procesare
-  const [paymentSuccess, setPaymentSuccess] = useState(false); // Pentru succes
 
   const handleSubmit = async () => {
     setLoading(true); // Începe procesarea
@@ -39,15 +38,12 @@ const PayButton: React.FC<PayButtonProps> = ({ data, disabled }) => {
       const result = await response.json();
       console.log(result);
 
-      // După finalizarea cererii, așteaptă puțin înainte de a afișa succesul
-      setTimeout(() => {
-        setPaymentSuccess(true);
-        setLoading(false); // Oprește cercul de încărcare
-      }, 50000000000); // Cerculețul continuă pentru încă 3 secunde
+      // Păstrează cerculețul în continuu
     } catch (error) {
       console.error(error);
       alert("Payment failed.");
-      setLoading(false); // Oprește procesarea în caz de eroare
+    } finally {
+      // setLoading(false); // Opțional: poți alege să nu oprești cerculețul.
     }
   };
 
@@ -66,26 +62,16 @@ const PayButton: React.FC<PayButtonProps> = ({ data, disabled }) => {
         {loading ? "Processing Payment..." : "Pay Now"}
       </button>
 
-      {/* Modal pentru pending sau succes */}
-      {(loading || paymentSuccess) && (
+      {/* Modal pentru pending */}
+      {loading && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded shadow-lg text-center">
-            {loading ? (
-              <div className="flex flex-col items-center gap-4">
-                <p className="text-gray-600 mt-4">Processing your payment...</p>
-                <div className="w-14 h-14 border-4 border-blue-500 border-t-transparent border-solid rounded-full animate-spin"></div>
-              </div>
-            ) : (
-              <div>
-                <h2 className="text-2xl font-bold text-green-600">Payment Successful!</h2>
-                <p className="text-gray-600 mt-2">Your payment has been processed successfully.</p>
-              </div>
-            )}
+            <div className="flex flex-col items-center gap-4">
+              <p className="text-gray-600 mt-4">Processing your payment...</p>
+              <div className="w-14 h-14 border-4 border-blue-500 border-t-transparent border-solid rounded-full animate-spin"></div>
+            </div>
             <button
-              onClick={() => {
-                setLoading(false);
-                setPaymentSuccess(false);
-              }}
+              onClick={() => setLoading(false)} // Închide modalul
               className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
             >
               Close
