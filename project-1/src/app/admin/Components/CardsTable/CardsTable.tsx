@@ -48,7 +48,7 @@ const CardTable: React.FC<CardTableProps> = ({ role, userId }) => {
   const [expandedState, setExpandedState] = useState<MRT_ExpandedState>({});
   const [editData, setEditData] = useState<Admin | Card | null>(null);
   const [deleteData, setDeleteData] = useState<Admin | Card | null>(null);
-
+  
   const fetchData = async () => {
     try {
       if (role === "manager") {

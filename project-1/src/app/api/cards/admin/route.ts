@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     // Extrage cookie-ul "token"
     const cookies = cookieHeader.split(";").map((cookie) => cookie.trim());
     const tokenCookie = cookies.find((cookie) => cookie.startsWith("token="));
-    console.log("Token cookie:", tokenCookie);
+   
 
     if (!tokenCookie) {
       return NextResponse.json(
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
     try {
       // Verifică și decodează token-ul JWT
       const decoded = jwt.verify(token, SECRET_KEY);
-      console.log("Decoded token:", decoded);
+  
 
       // Verifică dacă utilizatorul este autorizat
       if (!decoded || typeof decoded !== "object" || !decoded.role) {
@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
       const admins = await prisma.admin.findMany({
         include: { cards: true }, // Include cardurile asociate fiecărui admin
       });
-      console.log(admins);
+      
       
       return NextResponse.json(
         { message: "Authorized", data: admins },

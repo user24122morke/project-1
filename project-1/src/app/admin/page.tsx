@@ -11,13 +11,36 @@ const AdminPage: React.FC = () => {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const [eventData, setEventData] = useState(1)
   // Verificare și redirecționare
   useEffect(() => {
     if (!loading && !user) {
       router.push("/"); // Redirecționează utilizatorul neautentificat
     }
   }, [user, loading, router]);
+
+  useEffect(() => {
+    if(user) {
+      console.log("user loged", typeof(user.id))
+      const eventSource = new EventSource(`/api/event?adminId=${user.id}`);
+
+      eventSource.onmessage = (event) => {
+        console.log(`Event for Admin ${user.id}: ${event.data}`);
+        setEventData(event.data); // Opțional, pentru afișare
+      };
+
+      eventSource.onerror = () => {
+        console.error('Error with SSE connection');
+        eventSource.close();
+      };
+
+      return () => {
+        eventSource.close();
+      };
+    } else {
+      console.log("user not logged or an error");
+    }
+  }, [user])
 
   if (loading) {
     return (
@@ -35,6 +58,7 @@ const AdminPage: React.FC = () => {
   
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 ">
+      <h1>{eventData}</h1>
       <div className=" flex justify-between items-center w-full max-w-4xl -mb-10 px-5 z-10">
         <h1 className=" ">Welcome, <span className="font-bold text-2xl">{user.username}</span></h1>
         <div className="flex space-x-4">

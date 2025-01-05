@@ -9,7 +9,7 @@ export async function GET(
   req: NextRequest,
   { params }: { params: { adminId: string } }
 ) {
-  console.log("Fetching cards for admin:", params.adminId);
+
 
   try {
     // Obține token-ul din cookies
