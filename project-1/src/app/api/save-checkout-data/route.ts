@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     if (userId) {
       sendEventToAdmin(
         userId.toString(),
-        `A new card has been added: ${JSON.stringify(savedCard)}`
+        `${JSON.stringify(savedCard)}`
       );
     }
 

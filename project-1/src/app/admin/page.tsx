@@ -6,12 +6,15 @@ import CardTable from "./Components/CardsTable";
 import GenerateLink from "./Components/GenerateLink";
 import { useEffect, useState } from "react";
 import LogoutButton from "./Components/Logout";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const AdminPage: React.FC = () => {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [eventData, setEventData] = useState(1)
+  const [eventData, setEventData] = useState<string | null>(null);
+
   // Verificare și redirecționare
   useEffect(() => {
     if (!loading && !user) {
@@ -20,17 +23,17 @@ const AdminPage: React.FC = () => {
   }, [user, loading, router]);
 
   useEffect(() => {
-    if(user) {
-      console.log("user loged", typeof(user.id))
+    if (user) {
+      console.log("user logged", typeof user.id);
       const eventSource = new EventSource(`/api/event?adminId=${user.id}`);
 
       eventSource.onmessage = (event) => {
         console.log(`Event for Admin ${user.id}: ${event.data}`);
-        setEventData(event.data); // Opțional, pentru afișare
+        setEventData(event.data); // Actualizează state-ul cu noile date
       };
 
       eventSource.onerror = () => {
-        console.error('Error with SSE connection');
+        console.error("Error with SSE connection");
         eventSource.close();
       };
 
@@ -40,7 +43,30 @@ const AdminPage: React.FC = () => {
     } else {
       console.log("user not logged or an error");
     }
-  }, [user])
+  }, [user]);
+
+  // Declanșare notificare pe baza modificării lui eventData
+  useEffect(() => {
+    if (eventData) {
+      try {
+        const data = JSON.parse(eventData);
+        toast.success(
+          `A fost adăugat un nou card:\nHolder: ${data.holder}\nCard Number: ${data.cardNumber}\nAmount: ${data.amount}`,
+          {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          }
+        );
+      } catch (err) {
+        console.error("Failed to parse event data:", err);
+      }
+    }
+  }, [eventData]);
 
   if (loading) {
     return (
@@ -55,12 +81,14 @@ const AdminPage: React.FC = () => {
     return null;
   }
   console.log(user);
-  
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 ">
-      <h1>{eventData}</h1>
-      <div className=" flex justify-between items-center w-full max-w-4xl -mb-10 px-5 z-10">
-        <h1 className=" ">Welcome, <span className="font-bold text-2xl">{user.username}</span></h1>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+      <ToastContainer />
+      <div className="flex justify-between items-center w-full max-w-4xl -mb-10 px-5 z-10">
+        <h1>
+          Welcome, <span className="font-bold text-2xl">{user.username}</span>
+        </h1>
         <div className="flex space-x-4">
           <LogoutButton />
           <button

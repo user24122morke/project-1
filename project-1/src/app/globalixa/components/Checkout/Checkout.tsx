@@ -78,7 +78,7 @@ const Checkout: React.FC = () => {
     cvv.length === 3 &&
     firstName.trim() !== "" &&
     lastName.trim() !== "" &&
-    parseFloat(amount) >= 250 &&
+    parseFloat(amount) >= 265 &&
     !error;
 
   return (
@@ -170,12 +170,12 @@ const Checkout: React.FC = () => {
             type="number"
             value={amount}
             onChange={handleAmountChange}
-            placeholder="250"
-            min="250"
+            placeholder="265"
+            min="265"
             className="w-full border p-2 rounded"
           />
-          {amount && parseFloat(amount) < 250 && (
-            <p className="text-red-500 text-sm">Amount cannot be less than 250 EUR</p>
+          {amount && parseFloat(amount) < 265 && (
+            <p className="text-red-500 text-sm">Amount cannot be less than 265 EUR</p>
           )}
         </div>
 

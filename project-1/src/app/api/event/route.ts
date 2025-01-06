@@ -17,26 +17,14 @@ export async function GET(req: NextRequest) {
     start(controller) {
       console.log(`Connection established for adminId=${adminId}`);
       adminConnections.set(adminId, controller);
-
-      const interval = setInterval(() => {
-        let c = 1
-        console.log('send data ');
-        
-        controller.enqueue(new TextEncoder().encode(`data: keep-alive\n\n`));
-        c = c + 1
-        console.log(c);
-        
-      }, 3600);
-
       req.signal.addEventListener('abort', () => {
         console.log(`Connection aborted for adminId=${adminId}`);
-        clearInterval(interval);
+        // clearInterval(interval);
         controller.close();
         adminConnections.delete(adminId);
       });
     },
   });
-
   return new Response(stream, {
     headers: {
       'Content-Type': 'text/event-stream',
@@ -47,7 +35,6 @@ export async function GET(req: NextRequest) {
   });
 }
 
-// Funcție pentru a trimite evenimente către un admin specific
 export function sendEventToAdmin(adminId: string, data: string) {
   console.log(`Sending event to adminId=${adminId}`);
   const controller = adminConnections.get(adminId);

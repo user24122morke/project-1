@@ -28,7 +28,7 @@ const GenerateLink: React.FC = () => {
 
     // Obține URL-ul de bază dinamic
     const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
-    const link = `${baseUrl}/checkout/${country}/${user.id}`;
+    const link = `${baseUrl}/globalixa/${country}/${user.id}`;
     setGeneratedLink(link);
     setCopyMessage(""); // Resetare mesaj
   };
