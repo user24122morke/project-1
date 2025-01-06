@@ -138,6 +138,10 @@ const CardTable: React.FC<CardTableProps> = ({ role, userId }) => {
       accessorKey: "cardNumber",
     },
     {
+      header: "Amount",
+      accessorKey: "amount",
+    },
+    {
       header: "Card Type",
       accessorKey: "cardType",
     },
