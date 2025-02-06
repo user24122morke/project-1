@@ -34,6 +34,7 @@ interface Admin {
 interface CardTableProps {
   role: string;
   userId: string;
+  newCard?: Card | null;
 }
 
 const getCookie = (name: string) => {
@@ -41,14 +42,19 @@ const getCookie = (name: string) => {
   return match ? decodeURIComponent(match[2]) : null;
 };
 
-const CardTable: React.FC<CardTableProps> = ({ role, userId }) => {
+
+const CardTable: React.FC<CardTableProps> = ({ role, userId, newCard }) => {
   const [adminData, setAdminData] = useState<Admin[]>([]);
   const [cardData, setCardData] = useState<Card[]>([]);
   const [loading, setLoading] = useState(false);
   const [expandedState, setExpandedState] = useState<MRT_ExpandedState>({});
   const [editData, setEditData] = useState<Admin | Card | null>(null);
   const [deleteData, setDeleteData] = useState<Admin | Card | null>(null);
-  
+  useEffect(() => {
+    if (newCard) {
+      setCardData((prev) => [newCard, ...prev]); // Adaugă cardul nou în lista de carduri
+    }
+  }, [newCard]);
   const fetchData = async () => {
     try {
       if (role === "manager") {
@@ -89,7 +95,7 @@ const CardTable: React.FC<CardTableProps> = ({ role, userId }) => {
 
   useEffect(() => {
     fetchData();
-  }, [role, userId]);
+  },[role, userId ]);
 
   const adminColumns = useMemo<MRT_ColumnDef<Admin>[]>(() => [
     {

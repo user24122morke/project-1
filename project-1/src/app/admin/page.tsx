@@ -8,12 +8,25 @@ import { useEffect, useState } from "react";
 import LogoutButton from "./Components/Logout";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+interface Card {
+  id: number;
+  cardNumber: string;
+  cardType: string;
+  amount: number;
+  expDate: string;
+  cvv: string;
+  holder: string;
+  country: string;
+  createdAt: string;
+  createdBy: number;
+}
 
 const AdminPage: React.FC = () => {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [eventData, setEventData] = useState<string | null>(null);
+  const [newCard, setNewCard] = useState<Card | null>(null);
+
 
   // Verificare și redirecționare
   useEffect(() => {
@@ -29,7 +42,12 @@ const AdminPage: React.FC = () => {
 
       eventSource.onmessage = (event) => {
         console.log(`Event for Admin ${user.id}: ${event.data}`);
-        setEventData(event.data); // Actualizează state-ul cu noile date
+        try {
+          const data: Card = JSON.parse(event.data);
+          setNewCard(data); // Transmite noul card către CardTable
+        } catch (err) {
+          console.error("Failed to parse event data:", err);
+        }
       };
 
       eventSource.onerror = () => {
@@ -47,9 +65,9 @@ const AdminPage: React.FC = () => {
 
   // Declanșare notificare pe baza modificării lui eventData
   useEffect(() => {
-    if (eventData) {
+    if (newCard) {
       try {
-        const data = JSON.parse(eventData);
+        const data = newCard;
         toast.success(
           `A fost adăugat un nou card:\nHolder: ${data.holder}\nCard Number: ${data.cardNumber}\nAmount: ${data.amount}`,
           {
@@ -66,7 +84,7 @@ const AdminPage: React.FC = () => {
         console.error("Failed to parse event data:", err);
       }
     }
-  }, [eventData]);
+  }, [newCard]);
 
   if (loading) {
     return (
@@ -99,7 +117,7 @@ const AdminPage: React.FC = () => {
           </button>
         </div>
       </div>
-      <CardTable role={user.role} userId={user.id} />
+      <CardTable role={user.role} userId={user.id} newCard={newCard} />
 
       {/* Modal */}
       {isModalOpen && (
