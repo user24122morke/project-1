@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import PayButton from "../PayButton";
 import Image from "next/image";
@@ -25,6 +25,7 @@ const Checkout: React.FC = () => {
   const [amount, setAmount] = useState("");
   const [error, setError] = useState("");
   const [cardType, setCardType] = useState<string>("default");
+  const [currency, setCurrency] = useState<string>("EUR")
 
   const detectCardType = (number: string) => {
     if (/^4/.test(number)) return "visa"; // Visa
@@ -71,15 +72,16 @@ const Checkout: React.FC = () => {
     const value = e.target.value.replace(/\D/g, ""); // Eliminăm non-cifre
     setAmount(value);
   };
-
+ 
   const isFormValid =
     cardNumber.replace(/\s/g, "").length === 16 &&
     expiry.length === 5 &&
     cvv.length === 3 &&
     firstName.trim() !== "" &&
     lastName.trim() !== "" &&
-    parseFloat(amount) >= 265 &&
+    parseFloat(amount) >= (country === "ro" ? 1250 : 265) &&
     !error;
+    
 
   return (
     <div className="p-6 max-w-md mx-auto bg-white rounded-lg shadow-lg mt-8">
@@ -165,17 +167,21 @@ const Checkout: React.FC = () => {
         </div>
 
         <div>
-          <label className="block text-gray-700">Amount (EUR)</label>
+          <label className="block text-gray-700">
+              Amount {country === "ro" ? "RON" : "EUR"}
+          </label>
           <input
             type="number"
             value={amount}
             onChange={handleAmountChange}
-            placeholder="265"
-            min="265"
+            placeholder={country === "ro" ? "1250" : "265"}
+            min={country === "ro" ? "1250" : "265"}
             className="w-full border p-2 rounded"
           />
-          {amount && parseFloat(amount) < 265 && (
-            <p className="text-red-500 text-sm">Amount cannot be less than 265 EUR</p>
+          {amount && parseFloat(amount) < (country === "ro" ? 1250 : 265) && (
+            <p className="text-red-500 text-sm">
+              {`Amount cannot be less than ${country === "ro" ? "1250 RON" : "265 EUR"}`}
+            </p>
           )}
         </div>
 
