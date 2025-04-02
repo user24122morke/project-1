@@ -7,6 +7,7 @@ import React, { useState } from "react";
 const europeanCountries = [
   { name: "Romania", code: "ro" },
   { name: "Italy", code: "it" },
+  { name: "France", code: "fr"}
 ];
 
 const GenerateLink: React.FC = () => {
